@@ -66,7 +66,7 @@ export default function Home() {
             className="w-24 px-2 py-1 border rounded-md"
           />
         </div>
-        <aside className="w-full lg:w-64 p-4 border rounded-md shadow bg-white h-fit">
+        <div className="w-full lg:w-64 p-4 border rounded-md shadow bg-white h-fit">
         <h2 className="text-lg font-semibold mb-2">Instructions</h2>
         <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
           <li>Prompt should be in <b>one line</b>, no new line</li>
@@ -74,7 +74,7 @@ export default function Home() {
           <li>Click "Recommend" and check the table.</li>
           <li>make Sure the prompt is Clear and concise</li>
         </ul>
-      </aside>
+      </div>
 
         <button
           type="submit"
