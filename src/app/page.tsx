@@ -31,11 +31,7 @@ export default function Home() {
     }
   };
 
-  const GreenDot = () => (
-    <div className="flex justify-center items-center">
-      <span className="inline-block w-3 h-3 rounded-full bg-green-500" />
-    </div>
-  );
+  
 
   return (
     <main className="min-h-screen p-6 bg-gray-50 text-black">
