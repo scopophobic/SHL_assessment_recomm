@@ -2,16 +2,27 @@
 
 import { useState } from 'react';
 
+type Recommendation = {
+  name: string;
+  link: string;
+  duration: number | string;
+  keys: string[];
+  remote: boolean;
+  adaptive: boolean;
+};
+
 export default function Home() {
   const [prompt, setPrompt] = useState('');
   const [topK, setTopK] = useState(10);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<Recommendation[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setResult(null);
+    setErrorMsg(null);
 
     try {
       const response = await fetch('https://shl-recommendation-engine-hnys.onrender.com/recommend', {
@@ -24,14 +35,12 @@ export default function Home() {
 
       const data = await response.json();
       setResult(data.recommendations);
-    } catch (error) {
-      setResult({ error: 'Failed to fetch recommendation.' });
+    } catch {
+      setErrorMsg('Failed to fetch recommendation.');
     } finally {
       setLoading(false);
     }
   };
-
-  
 
   return (
     <main className="min-h-screen p-6 bg-gray-50 text-black">
@@ -66,7 +75,7 @@ export default function Home() {
         </button>
       </form>
 
-      {result && Array.isArray(result) && (
+      {result && (
         <div className="mt-10 overflow-x-auto">
           <table className="min-w-full bg-white rounded-md shadow border mt-4">
             <thead className="bg-gray-100 text-left text-sm font-semibold">
@@ -79,10 +88,15 @@ export default function Home() {
               </tr>
             </thead>
             <tbody className="text-sm">
-              {result.map((item: any, idx: number) => (
+              {result.map((item: Recommendation, idx: number) => (
                 <tr key={idx} className="hover:bg-gray-50">
                   <td className="px-4 py-3 border-b">
-                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
                       {item.name}
                     </a>
                   </td>
@@ -90,8 +104,8 @@ export default function Home() {
                     {item.duration === -1 ? 'Not specified' : item.duration}
                   </td>
                   <td className="px-4 py-3 border-b">{item.keys.join(', ')}</td>
-                  <td className="px-4 py-3 border-b text-center">{item.remote}</td>
-                  <td className="px-4 py-3 border-b text-center">{item.adaptive}</td>
+                  <td className="px-4 py-3 border-b text-center">{item.remote ? 'Yes' : null}</td>
+                  <td className="px-4 py-3 border-b text-center">{item.adaptive ? 'Yes' : null}</td>
                 </tr>
               ))}
             </tbody>
@@ -99,9 +113,7 @@ export default function Home() {
         </div>
       )}
 
-      {result?.error && (
-        <p className="text-red-600 mt-4">{result.error}</p>
-      )}
+      {errorMsg && <p className="text-red-600 mt-4">{errorMsg}</p>}
     </main>
   );
 }
