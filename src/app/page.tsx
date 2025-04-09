@@ -58,7 +58,35 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-6 bg-gray-50 text-black">
-      <h1 className="text-3xl font-bold mb-4">Assessment Recommender</h1>
+      {/* Navbar */}
+      <nav className="bg-white border-b shadow px-6 py-4 flex justify-between items-center">
+        <div className="text-2xl font-bold text-blue-600">
+          SHL <span className="text-gray-800">Assessment Recommender</span>
+        </div>
+        <div>
+        <a
+          href="https://github.com/YOUR_REPO_LINK"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-blue-600 hover:underline"
+        >
+          GitHub ↗
+        </a>
+        <br />
+        <a
+          href="https://shl-recommendation-engine-hnys.onrender.com/recommend"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-blue-600 hover:underline"
+        >
+          API endpoint ↗
+        </a>
+        </div>
+        
+      </nav>
+      <br />
+      <b><p>Enter your hire Prompt :</p></b>
+      {/* <h3 className="text-3xl font-bold mb-4">SHL Assessment Recommender</h3> */}
 
       <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
         <textarea
@@ -134,7 +162,7 @@ export default function Home() {
                         .map((full) => keyAbbreviations[full] || full[0]) // fallback to first letter if unknown
                         .join(", ")}
                   </td> */}
-                  <td className="px-4 py-3 border-b text-center space-x-1">
+                  {/* <td className="px-4 py-3 border-b text-center space-x-1">
                     {item.skills &&
                       item.skills.map((full) => {
                         const key = keyAbbreviations[full] || full[0];
@@ -147,6 +175,13 @@ export default function Home() {
                           </span>
                         );
                       })}
+                  </td> */}
+                  <td className="px-4 py-3 border-b text-center">
+                    {Array.isArray(item.skills)
+                      ? item.skills
+                          .map((full) => keyAbbreviations[full] || full[0])
+                          .join(", ")
+                      : null}
                   </td>
                   <td className="px-4 py-3 border-b text-center">
                     {item.remote_support === "Yes" && (
