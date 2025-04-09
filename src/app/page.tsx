@@ -22,6 +22,8 @@ const keyAbbreviations: { [key: string]: string } = {
   Simulations: "S",
 };
 
+const API_ENDPOINT = "https://shl-recommendation-engine-hnys.onrender.com/recommend";
+
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [topK, setTopK] = useState(10);
@@ -31,21 +33,22 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!prompt.trim()) {
+      setErrorMsg("Prompt cannot be empty.");
+      return;
+    }
+
     setLoading(true);
     setResult(null);
     setErrorMsg(null);
 
     try {
-      const response = await fetch(
-        "https://shl-recommendation-engine-hnys.onrender.com/recommend",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ prompt, top_k: topK }),
-        }
-      );
+      const response = await fetch(API_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, top_k: topK }),
+      });
 
       const data = await response.json();
       setResult(data.recommendations);
@@ -57,150 +60,133 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-6 bg-gray-50 text-black">
+    <main className="min-h-screen bg-gray-50 text-black">
       {/* Navbar */}
       <nav className="bg-white border-b shadow px-6 py-4 flex justify-between items-center">
-        <div className="text-2xl font-bold text-blue-600">
-          SHL <span className="text-gray-800">Assessment Recommender</span>
+        <div className="text-xl font-bold text-blue-600">
+          SHL <span className="text-gray-800">Recommender</span>
         </div>
-        <div>
-        <a
-          href="https://github.com/YOUR_REPO_LINK"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-blue-600 hover:underline"
-        >
-          GitHub ↗
-        </a>
-        <br />
-        <a
-          href="https://shl-recommendation-engine-hnys.onrender.com/recommend"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-blue-600 hover:underline"
-        >
-          API endpoint ↗
-        </a>
+        <div className="text-sm text-right space-y-1">
+          <a
+            href="https://github.com/scopophobic/test_recommendation_engine"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            GitHub ↗
+          </a>
+          <br />
+          <a
+            href={API_ENDPOINT}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            API Endpoint ↗
+          </a>
         </div>
-        
       </nav>
-      <br />
-      <b><p>Enter your hire Prompt :</p></b>
-      {/* <h3 className="text-3xl font-bold mb-4">SHL Assessment Recommender</h3> */}
 
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
-        <textarea
-          rows={5}
-          className="w-full p-3 border rounded-md shadow-sm"
-          placeholder="Enter hiring prompt..."
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-        />
+      {/* Main Content */}
+      <div className="p-6 max-w-5xl mx-auto">
+        <p className="font-semibold mb-2">Enter your hiring prompt:</p>
 
-        <div className="flex items-center gap-4">
-          <label className="font-medium">total recommendation :</label>
-          <input
-            type="number"
-            min={1}
-            max={20}
-            value={topK}
-            onChange={(e) => setTopK(Number(e.target.value))}
-            className="w-24 px-2 py-1 border rounded-md"
+        <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
+          <textarea
+            rows={5}
+            className="w-full p-3 border rounded-md shadow-sm"
+            placeholder="e.g. Looking for a sales executive with good reasoning and communication"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
           />
-        </div>
-        <div className="w-full lg:w-64 p-4 border rounded-md shadow bg-white h-fit">
-          <h2 className="text-lg font-semibold mb-2">Instructions</h2>
-          <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
-            <li>
-              Prompt should be in <b>one line</b>, no new line
-            </li>
-            <li>Set how many recommendations you want.</li>
-            <li>Click "Recommend" and check the table.</li>
-            <li>make Sure the prompt is Clear and concise</li>
-          </ul>
-        </div>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
-        >
-          {loading ? "Generating..." : "Recommend"}
-        </button>
-      </form>
+          <div className="flex items-center gap-4">
+            <label className="font-medium">Total recommendations:</label>
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={topK}
+              onChange={(e) => setTopK(Number(e.target.value))}
+              className="w-24 px-2 py-1 border rounded-md"
+            />
+          </div>
 
-      {result && (
-        <div className="mt-10 overflow-x-auto">
-          <table className="min-w-full bg-white rounded-md shadow border mt-4">
-            <thead className="bg-gray-100 text-left text-sm font-semibold">
-              <tr>
-                <th className="px-4 py-3 border-b">Name</th>
-                <th className="px-4 py-3 border-b">Duration</th>
-                <th className="px-4 py-3 border-b">Keys</th>
-                <th className="px-4 py-3 border-b text-center">Remote</th>
-                <th className="px-4 py-3 border-b text-center">Adaptive</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm">
-              {result.map((item: Recommendation, idx: number) => (
-                <tr key={idx} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 border-b">
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      {item.name}
-                    </a>
-                  </td>
-                  <td className="px-4 py-3 border-b">
-                    {item.duration === -1 ? "Not specified" : item.duration}
-                  </td>
-                  {/* <td className="px-4 py-3 border-b text-center">
-                    {item.skills &&
-                      item.skills
-                        .map((full) => keyAbbreviations[full] || full[0]) // fallback to first letter if unknown
-                        .join(", ")}
-                  </td> */}
-                  {/* <td className="px-4 py-3 border-b text-center space-x-1">
-                    {item.skills &&
-                      item.skills.map((full) => {
-                        const key = keyAbbreviations[full] || full[0];
-                        return (
-                          <span
-                            key={key}
-                            className="inline-block bg-gray-800 text-white text-xs font-semibold px-2 py-1 rounded"
-                          >
-                            {key}
-                          </span>
-                        );
-                      })}
-                  </td> */}
-                  <td className="px-4 py-3 border-b text-center">
-                    {Array.isArray(item.skills)
-                      ? item.skills
-                          .map((full) => keyAbbreviations[full] || full[0])
-                          .join(", ")
-                      : null}
-                  </td>
-                  <td className="px-4 py-3 border-b text-center">
-                    {item.remote_support === "Yes" && (
-                      <span className="text-green-500">🟢 Yes</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 border-b text-center">
-                    {item.adaptive_support === "Yes" && (
-                      <span className="text-green-500">🟢 Yes</span>
-                    )}
-                  </td>
+          {/* Instructions Box */}
+          <div className="w-full lg:w-[400px] p-4 border rounded-md shadow bg-white h-fit">
+            <h2 className="text-lg text-red-500 font-semibold mb-2">Instructions</h2>
+            <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Keep the prompt clear and concise.</li>
+              <li>Set how many recommendations you want.</li>
+              <li>Click <b>Recommend</b> to get suggestions.</li>
+            </ul>
+          </div>
+
+          <button
+            type="submit"
+            disabled={!prompt.trim()}
+            className={`${
+              !prompt.trim() ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            } bg-blue-600 text-white px-6 py-2 rounded-md`}
+          >
+            {loading ? "Generating..." : "Recommend"}
+          </button>
+        </form>
+
+        {/* Results Table */}
+        {result && (
+          <div className="mt-10 overflow-x-auto">
+            <table className="min-w-full bg-white rounded-md shadow border mt-4">
+              <thead className="bg-gray-100 text-left text-sm font-semibold">
+                <tr>
+                  <th className="px-4 py-3 border-b">Name</th>
+                  <th className="px-4 py-3 border-b">Duration</th>
+                  <th className="px-4 py-3 border-b">Keys</th>
+                  <th className="px-4 py-3 border-b text-center">Remote</th>
+                  <th className="px-4 py-3 border-b text-center">Adaptive</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody className="text-sm">
+                {result.map((item, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 border-b">
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {item.name}
+                      </a>
+                    </td>
+                    <td className="px-4 py-3 border-b">
+                      {item.duration === -1 ? "Not specified" : item.duration}
+                    </td>
+                    <td className="px-4 py-3 border-b text-center">
+                      {Array.isArray(item.skills)
+                        ? item.skills.map((full) => keyAbbreviations[full] || full[0]).join(", ")
+                        : "-"}
+                    </td>
+                    <td className="px-4 py-3 border-b text-center">
+                      {item.remote_support === "Yes" && (
+                        <span className="text-green-500">🟢 Yes</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 border-b text-center">
+                      {item.adaptive_support === "Yes" && (
+                        <span className="text-green-500">🟢 Yes</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-      {errorMsg && <p className="text-red-600 mt-4">{errorMsg}</p>}
+        {/* Error Message */}
+        {errorMsg && <p className="text-red-600 mt-4">{errorMsg}</p>}
+      </div>
     </main>
   );
 }
