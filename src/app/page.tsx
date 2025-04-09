@@ -1,18 +1,29 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 type Recommendation = {
   name: string;
   link: string;
   duration: number | string;
-  keys: string[];
-  remote: boolean;
-  adaptive: boolean;
+  skills: string[];
+  remote_support: string;
+  adaptive_support: string;
+};
+
+const keyAbbreviations: { [key: string]: string } = {
+  "Ability & Aptitude": "A",
+  "Biodata & Situational Judgement": "B",
+  Competencies: "C",
+  "Development & 360": "D",
+  "Assessment Exercises": "E",
+  "Knowledge & Skills": "K",
+  "Personality & Behavior": "P",
+  Simulations: "S",
 };
 
 export default function Home() {
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState("");
   const [topK, setTopK] = useState(10);
   const [result, setResult] = useState<Recommendation[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -25,18 +36,21 @@ export default function Home() {
     setErrorMsg(null);
 
     try {
-      const response = await fetch('https://shl-recommendation-engine-hnys.onrender.com/recommend', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt, top_k: topK }),
-      });
+      const response = await fetch(
+        "https://shl-recommendation-engine-hnys.onrender.com/recommend",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt, top_k: topK }),
+        }
+      );
 
       const data = await response.json();
       setResult(data.recommendations);
     } catch {
-      setErrorMsg('Failed to fetch recommendation.');
+      setErrorMsg("Failed to fetch recommendation.");
     } finally {
       setLoading(false);
     }
@@ -67,20 +81,22 @@ export default function Home() {
           />
         </div>
         <div className="w-full lg:w-64 p-4 border rounded-md shadow bg-white h-fit">
-        <h2 className="text-lg font-semibold mb-2">Instructions</h2>
-        <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
-          <li>Prompt should be in <b>one line</b>, no new line</li>
-          <li>Set how many recommendations you want.</li>
-          <li>Click "Recommend" and check the table.</li>
-          <li>make Sure the prompt is Clear and concise</li>
-        </ul>
-      </div>
+          <h2 className="text-lg font-semibold mb-2">Instructions</h2>
+          <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
+            <li>
+              Prompt should be in <b>one line</b>, no new line
+            </li>
+            <li>Set how many recommendations you want.</li>
+            <li>Click "Recommend" and check the table.</li>
+            <li>make Sure the prompt is Clear and concise</li>
+          </ul>
+        </div>
 
         <button
           type="submit"
           className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
         >
-          {loading ? 'Generating...' : 'Recommend'}
+          {loading ? "Generating..." : "Recommend"}
         </button>
       </form>
 
@@ -110,18 +126,43 @@ export default function Home() {
                     </a>
                   </td>
                   <td className="px-4 py-3 border-b">
-                    {item.duration === -1 ? 'Not specified' : item.duration}
+                    {item.duration === -1 ? "Not specified" : item.duration}
                   </td>
-                  <td className="px-4 py-3 border-b">{item.keys.join(', ')}</td>
-                  <td className="px-4 py-3 border-b text-center">{item.remote ? 'Yes' : null}</td>
-                  <td className="px-4 py-3 border-b text-center">{item.adaptive ? 'Yes' : null}</td>
+                  {/* <td className="px-4 py-3 border-b text-center">
+                    {item.skills &&
+                      item.skills
+                        .map((full) => keyAbbreviations[full] || full[0]) // fallback to first letter if unknown
+                        .join(", ")}
+                  </td> */}
+                  <td className="px-4 py-3 border-b text-center space-x-1">
+                    {item.skills &&
+                      item.skills.map((full) => {
+                        const key = keyAbbreviations[full] || full[0];
+                        return (
+                          <span
+                            key={key}
+                            className="inline-block bg-gray-800 text-white text-xs font-semibold px-2 py-1 rounded"
+                          >
+                            {key}
+                          </span>
+                        );
+                      })}
+                  </td>
+                  <td className="px-4 py-3 border-b text-center">
+                    {item.remote_support === "Yes" && (
+                      <span className="text-green-500">🟢 Yes</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 border-b text-center">
+                    {item.adaptive_support === "Yes" && (
+                      <span className="text-green-500">🟢 Yes</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          
         </div>
-       
       )}
 
       {errorMsg && <p className="text-red-600 mt-4">{errorMsg}</p>}
